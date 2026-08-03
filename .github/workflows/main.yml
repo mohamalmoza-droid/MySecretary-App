@@ -1,7 +1,5 @@
 # كود بناء تطبيق MySecretary (APK)
 
-يرجى نسخ الكود أدناه ووضعه في ملف `.github/workflows/main.yml` داخل مستودعك على GitHub.
-
 ```yaml
 name: Build MySecretary APK
 on: [push]
