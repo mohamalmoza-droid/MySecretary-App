@@ -1,23 +1,32 @@
-// Root build.gradle file for MySecretary (v10.5 - Stable)
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        // تحديث إصدار AGP ليتوافق تماماً مع Gradle 8.2 والبيئة السحابية
-        classpath 'com.android.tools.build:gradle:8.1.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
-    }
-}
+name: MySecretary Ultimate Build (v10.5 - Final Fix)
+on: [push, workflow_dispatch]
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Code
+        uses: actions/checkout@v4
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+      - name: 2. Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 3. Force Stable Gradle 8.2
+        run: |
+          # نستخدم إصداراً مستقراً لضمان التوافق وتجنب مشاكل الإصدارات الحديثة جداً
+          gradle wrapper --gradle-version 8.2 --distribution-type all
+          chmod +x gradlew
+
+      - name: 4. Build Debug APK
+        run: |
+          # بناء التطبيق مع تفعيل وضع تصحيح الأخطاء المفصل
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: 5. Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MySecretary-Final-APK
+          path: "app/build/outputs/apk/debug/*.apk"
