@@ -1,4 +1,4 @@
-name: Master Build MySecretary APK (v5)
+name: Master Build MySecretary APK (v6 - AutoFix)
 on: [push]
 
 jobs:
@@ -14,8 +14,35 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Generate Missing Build Files
+      - name: 3. Create Missing Root Files (Auto-Fix)
         run: |
+          # إنشاء ملف settings.gradle إذا لم يكن موجوداً
+          if [ ! -f settings.gradle ]; then
+            echo "include ':app'" > settings.gradle
+            echo "rootProject.name = 'MySecretary'" >> settings.gradle
+          fi
+
+          # إنشاء ملف build.gradle الرئيسي (الخريطة)
+          cat <<EOF > build.gradle
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.1.0'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          EOF
+
+          # إنشاء ملفات Gradle Wrapper
           if [ ! -f gradlew ]; then
             gradle wrapper
           fi
