@@ -1,9 +1,11 @@
+// Root build.gradle file for MySecretary (v10.3)
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
+        // استخدام إصدار متوافق تماماً مع Gradle 8.2
         classpath 'com.android.tools.build:gradle:8.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
     }
