@@ -1,4 +1,4 @@
-name: MySecretary Final Build (v10.6 - Build Path Fix)
+name: MySecretary Zero-Failure Build (v10.7)
 on: [push, workflow_dispatch]
 
 jobs:
@@ -14,28 +14,63 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Setup Android Project Structure
+      - name: 3. Nuclear Project Reconstruction (The "Out of Box" Fix)
         run: |
-          # إنشاء هيكل المجلدات إذا لم يكن موجوداً
+          # إنشاء هيكل المجلدات بالكامل
+          mkdir -p app/src/main/java/com/mysecretary/app
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/mipmap-mdpi
           mkdir -p app/src/main/assets
-          
-          # نقل ملفات الواجهات إلى المكان الصحيح لتضمينها في الـ APK
-          # نستخدم -f لضمان عدم توقف السكريبت إذا كانت الملفات موجودة بالفعل
-          cp -f index.html recordings.html settings.html overlay.html app/src/main/assets/ || true
 
-      - name: 4. Force Stable Gradle 8.2
+          # إنشاء ملف Manifest الأساسي
+          cat <<EOF > app/src/main/AndroidManifest.xml
+          <manifest xmlns:android="http://schemas.xml/apk/res/android" package="com.mysecretary.app">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <application android:label="MySecretary" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          # إنشاء ملف القيم الأساسي
+          echo '<resources><string name="app_name">MySecretary</string></resources>' > app/src/main/res/values/strings.xml
+          echo '<resources><style name="Theme.MySecretary" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > app/src/main/res/values/themes.xml
+
+          # نقل ملفات الـ HTML إلى Assets
+          cp -f *.html app/src/main/assets/ || true
+
+          # إنشاء ملف MainActivity.kt لضمان وجود كود برمجي للتشغيل
+          cat <<EOF > app/src/main/java/com/mysecretary/app/MainActivity.kt
+          package com.mysecretary.app
+          import android.os.Bundle
+          import android.webkit.WebView
+          import androidx.appcompat.app.AppCompatActivity
+          class MainActivity : AppCompatActivity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  val webView = WebView(this)
+                  webView.settings.javaScriptEnabled = true
+                  webView.loadUrl("file:///android_asset/index.html")
+                  setContentView(webView)
+              }
+          }
+          EOF
+
+      - name: 4. Build Setup
         run: |
-          # توليد ملفات الـ Wrapper لضمان استخدام نسخة مستقرة وتوافق التبعيات
-          gradle wrapper --gradle-version 8.2 --distribution-type all
+          gradle wrapper --gradle-version 8.2
           chmod +x gradlew
 
-      - name: 5. Build Debug APK
-        run: |
-          # بناء التطبيق مع تفعيل وضع تصحيح الأخطاء المفصل
-          ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: 5. Execute Build
+        run: ./gradlew assembleDebug --no-daemon
 
-      - name: 6. Upload APK Artifact
+      - name: 6. Deliver APK
         uses: actions/upload-artifact@v4
         with:
-          name: MySecretary-V10.6-APK
+          name: MySecretary-V10.7-Final-APK
           path: "app/build/outputs/apk/debug/*.apk"
