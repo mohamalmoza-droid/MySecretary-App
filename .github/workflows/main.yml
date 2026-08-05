@@ -1,4 +1,4 @@
-name: Master Build MySecretary APK (v8 - Gradle 9.6.1 Support)
+name: Master Build MySecretary APK (v9 - Compatibility Fix)
 on: [push]
 
 jobs:
@@ -14,41 +14,36 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Initialize Android Project Structure (Auto-Fix)
+      - name: 3. Setup Gradle Wrapper (Fix Compatibility)
         run: |
-          # إنشاء ملف settings.gradle
+          # سنقوم بتثبيت إصدار Gradle 8.2 المستقر لتجنب مشاكل الإصدار 9.6
+          gradle wrapper --gradle-version 8.2 --distribution-type all
+
+      - name: 4. Initialize Project Structure
+        run: |
+          # إنشاء الملفات الأساسية لضمان عدم وجود أخطاء في المسارات
           echo "include ':app'" > settings.gradle
           echo "rootProject.name = 'MySecretary'" >> settings.gradle
-
-          # إنشاء ملف build.gradle الرئيسي متوافق مع Gradle 9.x
+          
           cat <<EOF > build.gradle
           buildscript {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
               dependencies {
                   classpath 'com.android.tools.build:gradle:8.1.0'
                   classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
               }
           }
-          allprojects {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
+          allprojects { repositories { google(); mavenCentral() } }
           EOF
-
-          # التأكد من وجود مجلد app
           mkdir -p app
 
-      - name: 4. Build APK with Gradle 9.6.1
+      - name: 5. Build APK with Wrapper
         run: |
-          # استخدام خيار --non-interactive الجديد في Gradle 9.6.1 لمنع التعليق في بيئة CI
-          gradle assembleDebug --non-interactive --no-daemon
+          # استخدام ./gradlew بدلاً من gradle لضمان استخدام الإصدار 8.2 الذي قمنا بتثبيته
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
 
-      - name: 5. Upload Finished APK
+      - name: 6. Upload Finished APK
         uses: actions/upload-artifact@v4
         with:
           name: MySecretary-Ready-APK
