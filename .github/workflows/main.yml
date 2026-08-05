@@ -1,4 +1,4 @@
-name: Master Build MySecretary APK (v9 - Compatibility Fix)
+name: MySecretary Ultimate Build (v10 - Fixed)
 on: [push]
 
 jobs:
@@ -14,14 +14,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Setup Gradle Wrapper (Fix Compatibility)
+      - name: 3. Force Stable Gradle Wrapper
         run: |
-          # سنقوم بتثبيت إصدار Gradle 8.2 المستقر لتجنب مشاكل الإصدار 9.6
+          # نستخدم الإصدار 8.2 لضمان التوافق التام مع مكتبات الأندرويد الحالية
           gradle wrapper --gradle-version 8.2 --distribution-type all
 
-      - name: 4. Initialize Project Structure
+      - name: 4. Reconstruct Project Files (Safety Net)
         run: |
-          # إنشاء الملفات الأساسية لضمان عدم وجود أخطاء في المسارات
+          # إعادة إنشاء ملفات الإعدادات لضمان عدم وجود أخطاء في المسارات أو التسمية
           echo "include ':app'" > settings.gradle
           echo "rootProject.name = 'MySecretary'" >> settings.gradle
           
@@ -37,14 +37,13 @@ jobs:
           EOF
           mkdir -p app
 
-      - name: 5. Build APK with Wrapper
+      - name: 5. Build Debug APK
         run: |
-          # استخدام ./gradlew بدلاً من gradle لضمان استخدام الإصدار 8.2 الذي قمنا بتثبيته
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: 6. Upload Finished APK
+      - name: 6. Archive APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MySecretary-Ready-APK
-          path: "**/build/outputs/apk/debug/*.apk"
+          name: MySecretary-Final-APK
+          path: "app/build/outputs/apk/debug/*.apk"
