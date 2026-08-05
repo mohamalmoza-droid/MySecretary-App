@@ -1,4 +1,4 @@
-name: MySecretary Ultimate Build (v10.4 - Final Fix)
+name: MySecretary Final Build (v10.6 - Build Path Fix)
 on: [push, workflow_dispatch]
 
 jobs:
@@ -14,19 +14,28 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Force Stable Gradle 8.2
+      - name: 3. Setup Android Project Structure
         run: |
-          # نستخدم إصداراً مستقراً لضمان التوافق وتجنب مشاكل الإصدارات الحديثة جداً
+          # إنشاء هيكل المجلدات إذا لم يكن موجوداً
+          mkdir -p app/src/main/assets
+          
+          # نقل ملفات الواجهات إلى المكان الصحيح لتضمينها في الـ APK
+          # نستخدم -f لضمان عدم توقف السكريبت إذا كانت الملفات موجودة بالفعل
+          cp -f index.html recordings.html settings.html overlay.html app/src/main/assets/ || true
+
+      - name: 4. Force Stable Gradle 8.2
+        run: |
+          # توليد ملفات الـ Wrapper لضمان استخدام نسخة مستقرة وتوافق التبعيات
           gradle wrapper --gradle-version 8.2 --distribution-type all
           chmod +x gradlew
 
-      - name: 4. Build Debug APK
+      - name: 5. Build Debug APK
         run: |
-          # بناء التطبيق مع تفعيل وضع تصحيح الأخطاء المفصل في حال الفشل
+          # بناء التطبيق مع تفعيل وضع تصحيح الأخطاء المفصل
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: 5. Upload APK Artifact
+      - name: 6. Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MySecretary-Final-APK
+          name: MySecretary-V10.6-APK
           path: "app/build/outputs/apk/debug/*.apk"
