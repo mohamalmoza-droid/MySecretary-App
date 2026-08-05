@@ -1,4 +1,4 @@
-name: MySecretary Ultimate Build (v10.4 - Final Fix)
+name: MySecretary Ultimate Build (v10.5 - Final Fix)
 on: [push, workflow_dispatch]
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
 
       - name: 4. Build Debug APK
         run: |
-          # بناء التطبيق مع تفعيل وضع تصحيح الأخطاء المفصل في حال الفشل
+          # بناء التطبيق مع تفعيل وضع تصحيح الأخطاء المفصل
           ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: 5. Upload APK Artifact
