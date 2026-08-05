@@ -1,11 +1,11 @@
-// Root build.gradle file for MySecretary (v10.4 - Stable)
+// Root build.gradle file for MySecretary (v10.5 - Stable)
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        // استخدام إصدار AGP مستقر تماماً ومتوافق مع Gradle 8.2
+        // تحديث إصدار AGP ليتوافق تماماً مع Gradle 8.2 والبيئة السحابية
         classpath 'com.android.tools.build:gradle:8.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
     }
