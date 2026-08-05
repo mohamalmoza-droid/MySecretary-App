@@ -1,30 +1,70 @@
-name: MySecretary Zero-Failure Build (v10.7)
+name: MySecretary Universal Build (v10.8)
 on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Checkout Code
+      - name: 1. Checkout
         uses: actions/checkout@v4
 
-      - name: 2. Set up JDK 17
+      - name: 2. Java Setup
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Nuclear Project Reconstruction (The "Out of Box" Fix)
+      - name: 3. Total Project Reconstruction
         run: |
-          # إنشاء هيكل المجلدات بالكامل
+          # تنظيف أي فوضى سابقة
+          rm -rf app build.gradle settings.gradle
+          
+          # إنشاء هيكل المجلدات
           mkdir -p app/src/main/java/com/mysecretary/app
           mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/mipmap-mdpi
           mkdir -p app/src/main/assets
 
-          # إنشاء ملف Manifest الأساسي
+          # إنشاء settings.gradle
+          echo "include ':app'" > settings.gradle
+
+          # إنشاء build.gradle (Root)
+          cat <<EOF > build.gradle
+          buildscript {
+              repositories { google(); mavenCentral() }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.1.1'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
+              }
+          }
+          allprojects { repositories { google(); mavenCentral() } }
+          EOF
+
+          # إنشاء app/build.gradle (المفقود دائماً)
+          cat <<EOF > app/build.gradle
+          plugins {
+              id 'com.android.application'
+              id 'kotlin-android'
+          }
+          android {
+              namespace 'com.mysecretary.app'
+              compileSdk 33
+              defaultConfig {
+                  applicationId "com.mysecretary.app"
+                  minSdkVersion 21
+                  targetSdkVersion 33
+                  versionCode 1
+                  versionName "1.0"
+              }
+          }
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'androidx.core:core-ktx:1.9.0'
+          }
+          EOF
+
+          # إنشاء Manifest
           cat <<EOF > app/src/main/AndroidManifest.xml
-          <manifest xmlns:android="http://schemas.xml/apk/res/android" package="com.mysecretary.app">
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mysecretary.app">
               <uses-permission android:name="android.permission.INTERNET"/>
               <application android:label="MySecretary" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
@@ -37,40 +77,41 @@ jobs:
           </manifest>
           EOF
 
-          # إنشاء ملف القيم الأساسي
-          echo '<resources><string name="app_name">MySecretary</string></resources>' > app/src/main/res/values/strings.xml
-          echo '<resources><style name="Theme.MySecretary" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > app/src/main/res/values/themes.xml
-
-          # نقل ملفات الـ HTML إلى Assets
-          cp -f *.html app/src/main/assets/ || true
-
-          # إنشاء ملف MainActivity.kt لضمان وجود كود برمجي للتشغيل
+          # إنشاء MainActivity.kt
           cat <<EOF > app/src/main/java/com/mysecretary/app/MainActivity.kt
           package com.mysecretary.app
           import android.os.Bundle
           import android.webkit.WebView
+          import android.webkit.WebViewClient
           import androidx.appcompat.app.AppCompatActivity
           class MainActivity : AppCompatActivity() {
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   val webView = WebView(this)
                   webView.settings.javaScriptEnabled = true
+                  webView.webViewClient = WebViewClient()
                   webView.loadUrl("file:///android_asset/index.html")
                   setContentView(webView)
               }
           }
           EOF
 
-      - name: 4. Build Setup
+          # إنشاء ملفات القيم
+          echo '<resources><string name="app_name">MySecretary</string></resources>' > app/src/main/res/values/strings.xml
+
+          # سحب ملفات الـ HTML
+          cp -f *.html app/src/main/assets/ || true
+
+      - name: 4. Build Environment
         run: |
           gradle wrapper --gradle-version 8.2
           chmod +x gradlew
 
-      - name: 5. Execute Build
+      - name: 5. Execute assembleDebug
         run: ./gradlew assembleDebug --no-daemon
 
       - name: 6. Deliver APK
         uses: actions/upload-artifact@v4
         with:
-          name: MySecretary-V10.7-Final-APK
+          name: MySecretary-V10.8-Ultimate-APK
           path: "app/build/outputs/apk/debug/*.apk"
