@@ -1,4 +1,4 @@
-name: MySecretary Ultimate Build (v10.3 - Stable)
+name: MySecretary Ultimate Build (v10.4 - Final Fix)
 on: [push, workflow_dispatch]
 
 jobs:
@@ -14,18 +14,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Force Gradle 8.2 Wrapper
+      - name: 3. Force Stable Gradle 8.2
         run: |
-          # إجبار النظام على استخدام إصدار مستقر لتجنب مشاكل التوافق
+          # نستخدم إصداراً مستقراً لضمان التوافق وتجنب مشاكل الإصدارات الحديثة جداً
           gradle wrapper --gradle-version 8.2 --distribution-type all
-
-      - name: 4. Permissions and Build
-        run: |
           chmod +x gradlew
+
+      - name: 4. Build Debug APK
+        run: |
+          # بناء التطبيق مع تفعيل وضع تصحيح الأخطاء المفصل في حال الفشل
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: 5. Upload APK
+      - name: 5. Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MySecretary-Stable-APK
+          name: MySecretary-Final-APK
           path: "app/build/outputs/apk/debug/*.apk"
