@@ -1,4 +1,4 @@
-name: MySecretary Ultimate Build (v10.1 - Stable)
+name: MySecretary Ultimate Build (v10.3 - Stable)
 on: [push, workflow_dispatch]
 
 jobs:
@@ -16,6 +16,7 @@ jobs:
 
       - name: 3. Force Gradle 8.2 Wrapper
         run: |
+          # إجبار النظام على استخدام إصدار مستقر لتجنب مشاكل التوافق
           gradle wrapper --gradle-version 8.2 --distribution-type all
 
       - name: 4. Permissions and Build
