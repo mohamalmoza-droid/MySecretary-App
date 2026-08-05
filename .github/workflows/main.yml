@@ -1,4 +1,4 @@
-name: Master Build MySecretary APK (v7 - Fixed Structure)
+name: Master Build MySecretary APK (v8 - Gradle 9.6.1 Support)
 on: [push]
 
 jobs:
@@ -14,13 +14,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Initialize Android Project Structure
+      - name: 3. Initialize Android Project Structure (Auto-Fix)
         run: |
-          # 1. إنشاء ملف settings.gradle في الجذر
+          # إنشاء ملف settings.gradle
           echo "include ':app'" > settings.gradle
           echo "rootProject.name = 'MySecretary'" >> settings.gradle
 
-          # 2. إنشاء ملف build.gradle الرئيسي في الجذر
+          # إنشاء ملف build.gradle الرئيسي متوافق مع Gradle 9.x
           cat <<EOF > build.gradle
           buildscript {
               repositories {
@@ -40,13 +40,13 @@ jobs:
           }
           EOF
 
-          # 3. التأكد من وجود مجلد app وملف build.gradle داخله
+          # التأكد من وجود مجلد app
           mkdir -p app
 
-      - name: 4. Build APK
+      - name: 4. Build APK with Gradle 9.6.1
         run: |
-          # استخدام gradle المثبت في نظام ubuntu-latest لبناء المشروع مباشرة
-          gradle assembleDebug
+          # استخدام خيار --non-interactive الجديد في Gradle 9.6.1 لمنع التعليق في بيئة CI
+          gradle assembleDebug --non-interactive --no-daemon
 
       - name: 5. Upload Finished APK
         uses: actions/upload-artifact@v4
