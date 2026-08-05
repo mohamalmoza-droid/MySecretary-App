@@ -1,23 +1,22 @@
-// Root build.gradle file for MySecretary (v10.6 - Path Fix)
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        // استخدام إصدار AGP 8.1.1 المتوافق مع Gradle 8.2 وبيئة GitHub الحديثة
-        classpath 'com.android.tools.build:gradle:8.1.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10"
-    }
-}
+# خطة الحل النهائي والجذري (V10.7 - Zero-Failure Strategy)
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+## 1. التشخيص الصريح (لماذا فشلت المحاولات السابقة؟)
+المشكلة ليست في الكود، بل في **نقص الملفات الهيكلية** في مستودع GitHub الخاص بك. الأندرويد يحتاج لملفات مثل `AndroidManifest.xml` و `strings.xml` في مسارات محددة جداً. بما أنك ترفع الملفات يدوياً من الهاتف، فمن المؤكد أن هناك ملفات ناقصة أو مسارات خاطئة (مثل `app/src/main/res/values`).
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+## 2. الحل "خارج الصندوق" (البناء الذاتي)
+بدلاً من مطالبتك بإنشاء 20 مجلداً يدوياً من الهاتف، سنقوم بتعديل سكريبت `main.yml` ليتحول إلى **"مهندس بناء"**. السكريبت سيقوم بـ:
+- إنشاء كامل هيكل مجلدات أندرويد من الصفر.
+- كتابة ملفات XML الأساسية (Manifest, Strings, Styles) آلياً.
+- نقل ملفات الـ HTML الخاصة بك إلى مجلد `assets` الصحيح.
+- بناء الـ APK باستخدام نسخة Gradle مستقرة تماماً.
+
+## 3. الأكواد المطلوبة (قم بتحديثها الآن)
+
+### أ. ملف `main.yml` (النسخة الجبارة v10.7)
+يجب استبدال محتوى `.github/workflows/main.yml` بالكود الموجود في المستند المخصص على اللوحة الجانبية.
+
+### ب. ملف `build.gradle` (الجذر)
+تأكد من مطابقة الكود الموجود في الجذر مع النسخة المستقرة v10.6.
+
+---
+**تنبيه:** هذه الطريقة تتجاوز الاعتماد على ما قمت برفعه يدوياً وتعتمد على ما سيقوم السكريبت بإنشائه في بيئة GitHub السحابية.
